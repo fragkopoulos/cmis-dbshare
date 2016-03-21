@@ -118,8 +118,8 @@ public class DBShareRepository {
     private static final String ROOT_ID = "ROOT";
     private static final String USER_UNKNOWN = "<unknown>";
 
-    private FsblockJpaController fsblockFacade = new FsblockJpaController();
-    private DatablockJpaController datablockJpaController = new DatablockJpaController();
+    private final FsblockJpaController fsblockFacade = new FsblockJpaController();
+    private final DatablockJpaController datablockJpaController = new DatablockJpaController();
 
     /**
      * Repository id.
@@ -149,7 +149,7 @@ public class DBShareRepository {
     private final RepositoryInfo repositoryInfo11;
 
     public DBShareRepository(final String repositoryId, final String rootPath, final DBShareTypeManager typeManager) {
-        
+
         // check repository id
         if (repositoryId == null || repositoryId.trim().length() == 0) {
             throw new IllegalArgumentException("Invalid repository id!");
@@ -187,6 +187,8 @@ public class DBShareRepository {
 
     /**
      * Returns the root directory of this repository
+     *
+     * @return
      */
     public Fsblock getRootDirectory() {
         return root;
@@ -298,6 +300,9 @@ public class DBShareRepository {
 
     /**
      * CMIS getRepositoryInfo.
+     *
+     * @param context
+     * @return
      */
     public RepositoryInfo getRepositoryInfo(CallContext context) {
         debug("getRepositoryInfo");
@@ -334,6 +339,14 @@ public class DBShareRepository {
 
     /**
      * Create* dispatch for AtomPub.
+     *
+     * @param context
+     * @param properties
+     * @param folderId
+     * @param contentStream
+     * @param versioningState
+     * @param objectInfos
+     * @return
      */
     public ObjectData create(CallContext context, Properties properties, String folderId, ContentStream contentStream,
             VersioningState versioningState, ObjectInfoHandler objectInfos) {
@@ -347,16 +360,20 @@ public class DBShareRepository {
         }
 
         String objectId = null;
-        if (type.getBaseTypeId() == BaseTypeId.CMIS_DOCUMENT) {
-            objectId = createDocument(context, properties, folderId, contentStream, versioningState);
-        } else if (type.getBaseTypeId() == BaseTypeId.CMIS_FOLDER) {
-            if (contentStream != null || versioningState != null) {
-                throw new CmisInvalidArgumentException("Cannot create a folder with content or a versioning state!");
+        if (null != type.getBaseTypeId()) {
+            switch (type.getBaseTypeId()) {
+                case CMIS_DOCUMENT:
+                    objectId = createDocument(context, properties, folderId, contentStream, versioningState);
+                    break;
+                case CMIS_FOLDER:
+                    if (contentStream != null || versioningState != null) {
+                        throw new CmisInvalidArgumentException("Cannot create a folder with content or a versioning state!");
+                    }
+                    objectId = createFolder(context, properties, folderId);
+                    break;
+                default:
+                    throw new CmisObjectNotFoundException("Cannot create object of type '" + typeId + "'!");
             }
-
-            objectId = createFolder(context, properties, folderId);
-        } else {
-            throw new CmisObjectNotFoundException("Cannot create object of type '" + typeId + "'!");
         }
 
         return compileObjectData(context, getFile(objectId), null, false, false, userReadOnly, objectInfos);
@@ -364,6 +381,11 @@ public class DBShareRepository {
 
     /**
      * CMIS createFolder.
+     *
+     * @param context
+     * @param properties
+     * @param folderId
+     * @return
      */
     public String createFolder(CallContext context, Properties properties, String folderId) {
         debug("createFolder");
@@ -423,6 +445,13 @@ public class DBShareRepository {
 
     /**
      * CMIS createDocument.
+     *
+     * @param context
+     * @param properties
+     * @param folderId
+     * @param contentStream
+     * @param versioningState
+     * @return
      */
     public String createDocument(CallContext context, Properties properties, String folderId,
             ContentStream contentStream, VersioningState versioningState) {
@@ -500,6 +529,12 @@ public class DBShareRepository {
 
     /**
      * CMIS setContentStream, deleteContentStream, and appendContentStream.
+     *
+     * @param context
+     * @param objectId
+     * @param overwriteFlag
+     * @param contentStream
+     * @param append
      */
     public void changeContentStream(CallContext context, Holder<String> objectId, Boolean overwriteFlag,
             ContentStream contentStream, boolean append) {
@@ -701,6 +736,12 @@ public class DBShareRepository {
 
     /**
      * CMIS getContentStream.
+     *
+     * @param context
+     * @param objectId
+     * @param offset
+     * @param length
+     * @return
      */
     public ContentStream getContentStream(CallContext context, String objectId, BigInteger offset, BigInteger length) {
         debug("getContentStream");
@@ -740,6 +781,9 @@ public class DBShareRepository {
 
     /**
      * CMIS deleteObject.
+     *
+     * @param context
+     * @param objectId
      */
     public void deleteObject(CallContext context, String objectId) {
         debug("deleteObject");
@@ -774,6 +818,11 @@ public class DBShareRepository {
 
     /**
      * CMIS deleteTree.
+     *
+     * @param context
+     * @param folderId
+     * @param continueOnFailure
+     * @return
      */
     public FailedToDeleteData deleteTree(CallContext context, String folderId, Boolean continueOnFailure) {
         debug("deleteTree");
@@ -809,6 +858,15 @@ public class DBShareRepository {
 
     /**
      * CMIS getObject.
+     *
+     * @param context
+     * @param objectId
+     * @param versionServicesId
+     * @param filter
+     * @param includeAllowableActions
+     * @param includeAcl
+     * @param objectInfos
+     * @return
      */
     public ObjectData getObject(CallContext context, String objectId, String versionServicesId, String filter,
             Boolean includeAllowableActions, Boolean includeAcl, ObjectInfoHandler objectInfos) {
@@ -842,6 +900,14 @@ public class DBShareRepository {
 
     /**
      * CMIS getObjectByPath.
+     *
+     * @param context
+     * @param folderPath
+     * @param filter
+     * @param includeAllowableActions
+     * @param includeACL
+     * @param objectInfos
+     * @return
      */
     public ObjectData getObjectByPath(CallContext context, String folderPath, String filter,
             boolean includeAllowableActions, boolean includeACL, ObjectInfoHandler objectInfos) {
@@ -876,6 +942,12 @@ public class DBShareRepository {
 
     /**
      * CMIS getFolderParent.
+     *
+     * @param context
+     * @param folderId
+     * @param filter
+     * @param objectInfos
+     * @return
      */
     public ObjectData getFolderParent(CallContext context, String folderId, String filter, ObjectInfoHandler objectInfos) {
         List<ObjectParentData> parents = getObjectParents(context, folderId, filter, false, false, objectInfos);
@@ -889,6 +961,14 @@ public class DBShareRepository {
 
     /**
      * CMIS getObjectParents.
+     *
+     * @param context
+     * @param objectId
+     * @param filter
+     * @param includeAllowableActions
+     * @param includeRelativePathSegment
+     * @param objectInfos
+     * @return
      */
     public List<ObjectParentData> getObjectParents(CallContext context, String objectId, String filter,
             Boolean includeAllowableActions, Boolean includeRelativePathSegment, ObjectInfoHandler objectInfos) {
@@ -930,6 +1010,17 @@ public class DBShareRepository {
 
     /**
      * CMIS getChildren.
+     *
+     * @param context
+     * @param folderId
+     * @param filter
+     * @param orderBy
+     * @param includeAllowableActions
+     * @param includePathSegment
+     * @param maxItems
+     * @param skipCount
+     * @param objectInfos
+     * @return
      */
     public ObjectInFolderList getChildren(CallContext context, String folderId, String filter, String orderBy,
             Boolean includeAllowableActions, Boolean includePathSegment, BigInteger maxItems, BigInteger skipCount,
@@ -1089,6 +1180,16 @@ public class DBShareRepository {
 
     /**
      * CMIS getDescendants.
+     *
+     * @param context
+     * @param folderId
+     * @param depth
+     * @param filter
+     * @param includeAllowableActions
+     * @param includePathSegment
+     * @param objectInfos
+     * @param foldersOnly
+     * @return
      */
     public List<ObjectInFolderContainer> getDescendants(CallContext context, String folderId, BigInteger depth,
             String filter, Boolean includeAllowableActions, Boolean includePathSegment, ObjectInfoHandler objectInfos,
@@ -1576,7 +1677,7 @@ public class DBShareRepository {
             entry.setPrincipal(principal);
             entry.setPermissions(new ArrayList<String>());
             entry.getPermissions().add(BasicPermissions.READ);
-            if (!ue.getValue().booleanValue()) {
+            if (!ue.getValue()) {
                 entry.getPermissions().add(BasicPermissions.WRITE);
                 entry.getPermissions().add(BasicPermissions.ALL);
             }
@@ -1599,11 +1700,7 @@ public class DBShareRepository {
      * otherwise
      */
     private boolean isValidName(String name) {
-        if (name == null || name.length() == 0) {
-            return false;
-        }
-
-        return true;
+        return !(name == null || name.length() == 0);
     }
 
     /**
@@ -1619,6 +1716,10 @@ public class DBShareRepository {
 
     /**
      * CMIS getTypeDefinition.
+     *
+     * @param context
+     * @param typeId
+     * @return
      */
     public TypeDefinition getTypeDefinition(CallContext context, String typeId) {
         debug("getTypeDefinition");
@@ -1629,6 +1730,13 @@ public class DBShareRepository {
 
     /**
      * CMIS getTypesChildren.
+     *
+     * @param context
+     * @param typeId
+     * @param includePropertyDefinitions
+     * @param maxItems
+     * @param skipCount
+     * @return
      */
     public TypeDefinitionList getTypeChildren(CallContext context, String typeId, Boolean includePropertyDefinitions,
             BigInteger maxItems, BigInteger skipCount) {

@@ -41,14 +41,20 @@ public class DBShareCmisService extends AbstractCmisService implements CallConte
      * Sets the call context.
      *
      * This method should only be called by the service factory.
+     *
+     * @param context
      */
+    @Override
     public void setCallContext(CallContext context) {
         this.context = context;
     }
 
     /**
      * Gets the call context.
+     *
+     * @return
      */
+    @Override
     public CallContext getCallContext() {
         return context;
     }
@@ -102,11 +108,13 @@ public class DBShareCmisService extends AbstractCmisService implements CallConte
 
     /**
      * Gets the repository for the current call.
+     *
+     * @return
      */
     public DBShareRepository getRepository() {
         return repositoryManager.getRepository(getCallContext().getRepositoryId());
     }
-    
+
     @Override
     public TypeDefinitionList getTypeChildren(String repositoryId, String typeId, Boolean includePropertyDefinitions,
             BigInteger maxItems, BigInteger skipCount, ExtensionsData extension) {
@@ -134,12 +142,12 @@ public class DBShareCmisService extends AbstractCmisService implements CallConte
         return getRepository().getDescendants(getCallContext(), folderId, depth, filter, includeAllowableActions,
                 includePathSegment, this, false);
     }
-    
+
     @Override
     public ObjectData getFolderParent(String repositoryId, String folderId, String filter, ExtensionsData extension) {
         return getRepository().getFolderParent(getCallContext(), folderId, filter, this);
     }
-    
+
     @Override
     public List<ObjectInFolderContainer> getFolderTree(String repositoryId, String folderId, BigInteger depth,
             String filter, Boolean includeAllowableActions, IncludeRelationships includeRelationships,
@@ -147,7 +155,7 @@ public class DBShareCmisService extends AbstractCmisService implements CallConte
         return getRepository().getDescendants(getCallContext(), folderId, depth, filter, includeAllowableActions,
                 includePathSegment, this, true);
     }
-    
+
     @Override
     public List<ObjectParentData> getObjectParents(String repositoryId, String objectId, String filter,
             Boolean includeAllowableActions, IncludeRelationships includeRelationships, String renditionFilter,
@@ -163,8 +171,7 @@ public class DBShareCmisService extends AbstractCmisService implements CallConte
         return getRepository().getObject(getCallContext(), objectId, null, filter, includeAllowableActions, includeAcl,
                 this);
     }
-    
-    
+
     @Override
     public ObjectData getObjectByPath(String repositoryId, String path, String filter, Boolean includeAllowableActions,
             IncludeRelationships includeRelationships, String renditionFilter, Boolean includePolicyIds,
@@ -172,7 +179,7 @@ public class DBShareCmisService extends AbstractCmisService implements CallConte
         return getRepository().getObjectByPath(getCallContext(), path, filter, includeAllowableActions, includeAcl,
                 this);
     }
-    
+
     @Override
     public ObjectData getObjectOfLatestVersion(String repositoryId, String objectId, String versionSeriesId,
             Boolean major, String filter, Boolean includeAllowableActions, IncludeRelationships includeRelationships,
@@ -180,9 +187,8 @@ public class DBShareCmisService extends AbstractCmisService implements CallConte
         return getRepository().getObject(getCallContext(), objectId, versionSeriesId, filter, includeAllowableActions,
                 includeAcl, this);
     }
-    
-    // --- object service ---
 
+    // --- object service ---
     @Override
     public String create(String repositoryId, Properties properties, String folderId, ContentStream contentStream,
             VersioningState versioningState, List<String> policies, ExtensionsData extension) {
@@ -191,7 +197,7 @@ public class DBShareCmisService extends AbstractCmisService implements CallConte
 
         return object.getId();
     }
-    
+
     @Override
     public String createDocument(String repositoryId, Properties properties, String folderId,
             ContentStream contentStream, VersioningState versioningState, List<String> policies, Acl addAces,
@@ -206,19 +212,18 @@ public class DBShareCmisService extends AbstractCmisService implements CallConte
         return getRepository().createDocumentFromSource(getCallContext(), sourceId, properties, folderId,
                 versioningState);
     }*/
-    
     @Override
     public ContentStream getContentStream(String repositoryId, String objectId, String streamId, BigInteger offset,
             BigInteger length, ExtensionsData extension) {
         return getRepository().getContentStream(getCallContext(), objectId, offset, length);
     }
-    
+
     @Override
     public void setContentStream(String repositoryId, Holder<String> objectId, Boolean overwriteFlag,
             Holder<String> changeToken, ContentStream contentStream, ExtensionsData extension) {
         getRepository().changeContentStream(getCallContext(), objectId, overwriteFlag, contentStream, false);
     }
-    
+
     @Override
     public void deleteObjectOrCancelCheckOut(String repositoryId, String objectId, Boolean allVersions,
             ExtensionsData extension) {
@@ -230,6 +235,5 @@ public class DBShareCmisService extends AbstractCmisService implements CallConte
             UnfileObject unfileObjects, Boolean continueOnFailure, ExtensionsData extension) {
         return getRepository().deleteTree(getCallContext(), folderId, continueOnFailure);
     }
-    
-    
+
 }

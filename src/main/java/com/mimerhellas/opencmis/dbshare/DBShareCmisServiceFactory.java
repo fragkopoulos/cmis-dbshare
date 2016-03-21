@@ -1,10 +1,12 @@
 package com.mimerhellas.opencmis.dbshare;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import javax.xml.stream.XMLStreamException;
 
 import org.apache.chemistry.opencmis.commons.impl.server.AbstractServiceFactory;
 import org.apache.chemistry.opencmis.commons.server.CallContext;
@@ -161,7 +163,10 @@ public class DBShareCmisServiceFactory extends AbstractServiceFactory {
                         continue;
                     } catch (IllegalArgumentException e) {
                         // resource not found -> try it as a regular file
-                    } catch (Exception e) {
+                    } catch (IOException e) {
+                        LOG.warn("Could not load type defintion from resource '{}': {}", typeFile, e.getMessage(), e);
+                        continue;
+                    } catch (XMLStreamException e) {
                         LOG.warn("Could not load type defintion from resource '{}': {}", typeFile, e.getMessage(), e);
                         continue;
                     }
@@ -169,7 +174,9 @@ public class DBShareCmisServiceFactory extends AbstractServiceFactory {
 
                 try {
                     typeManager.loadTypeDefinitionFromFile(typeFile);
-                } catch (Exception e) {
+                } catch (IOException e) {
+                    LOG.warn("Could not load type defintion from file '{}': {}", typeFile, e.getMessage(), e);
+                } catch (XMLStreamException e) {
                     LOG.warn("Could not load type defintion from file '{}': {}", typeFile, e.getMessage(), e);
                 }
             } else if (key.startsWith(PREFIX_REPOSITORY)) {
@@ -208,7 +215,7 @@ public class DBShareCmisServiceFactory extends AbstractServiceFactory {
             }
         }
     }
-    
+
     /**
      * Finds all substrings in curly braces and replaces them with the value of
      * the corresponding system property.
@@ -235,13 +242,11 @@ public class DBShareCmisServiceFactory extends AbstractServiceFactory {
                 } else {
                     property.append(c);
                 }
+            } else if (c == '{') {
+                property = new StringBuilder(32);
+                inProperty = true;
             } else {
-                if (c == '{') {
-                    property = new StringBuilder(32);
-                    inProperty = true;
-                } else {
-                    result.append(c);
-                }
+                result.append(c);
             }
         }
 

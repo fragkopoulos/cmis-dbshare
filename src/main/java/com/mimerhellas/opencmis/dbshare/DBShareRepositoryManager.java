@@ -37,6 +37,8 @@ public class DBShareRepositoryManager {
 
     /**
      * Adds a repository object.
+     *
+     * @param fsr
      */
     public void addRepository(DBShareRepository fsr) {
         if (fsr == null || fsr.getRepositoryId() == null) {
@@ -48,6 +50,9 @@ public class DBShareRepositoryManager {
 
     /**
      * Gets a repository object by id.
+     *
+     * @param repositoryId
+     * @return
      */
     public DBShareRepository getRepository(String repositoryId) {
         DBShareRepository result = repositories.get(repositoryId);
@@ -60,6 +65,8 @@ public class DBShareRepositoryManager {
 
     /**
      * Returns all repository objects.
+     *
+     * @return
      */
     public Collection<DBShareRepository> getRepositories() {
         return repositories.values();

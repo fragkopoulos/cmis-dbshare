@@ -39,18 +39,25 @@ public final class DBShareUtils {
     /**
      * Returns the boolean value of the given value or the default value if the
      * given value is <code>null</code>.
+     *
+     * @param value
+     * @param def
+     * @return
      */
     public static boolean getBooleanParameter(Boolean value, boolean def) {
         if (value == null) {
             return def;
         }
 
-        return value.booleanValue();
+        return value;
     }
 
     /**
      * Converts milliseconds into a {@link GregorianCalendar} object, setting
      * the timezone to GMT and cutting milliseconds off.
+     *
+     * @param millis
+     * @return
      */
     public static GregorianCalendar millisToCalendar(long millis) {
         GregorianCalendar result = new GregorianCalendar();
@@ -64,6 +71,9 @@ public final class DBShareUtils {
      * Splits a filter statement into a collection of properties. If
      * <code>filter</code> is <code>null</code>, empty or one of the properties
      * is '*' , an empty collection will be returned.
+     *
+     * @param filter
+     * @return
      */
     public static Set<String> splitFilter(String filter) {
         if (filter == null) {
@@ -95,6 +105,9 @@ public final class DBShareUtils {
 
     /**
      * Gets the type id from a set of properties.
+     *
+     * @param properties
+     * @return
      */
     public static String getObjectTypeId(Properties properties) {
         PropertyData<?> typeProperty = properties.getProperties().get(PropertyIds.OBJECT_TYPE_ID);
@@ -112,6 +125,10 @@ public final class DBShareUtils {
 
     /**
      * Returns the first value of an id property.
+     *
+     * @param properties
+     * @param name
+     * @return
      */
     public static String getIdProperty(Properties properties, String name) {
         PropertyData<?> property = properties.getProperties().get(name);
@@ -124,6 +141,10 @@ public final class DBShareUtils {
 
     /**
      * Returns the first value of a string property.
+     *
+     * @param properties
+     * @param name
+     * @return
      */
     public static String getStringProperty(Properties properties, String name) {
         PropertyData<?> property = properties.getProperties().get(name);
@@ -136,6 +157,10 @@ public final class DBShareUtils {
 
     /**
      * Returns the first value of a datetime property.
+     *
+     * @param properties
+     * @param name
+     * @return
      */
     public static GregorianCalendar getDateTimeProperty(Properties properties, String name) {
         PropertyData<?> property = properties.getProperties().get(name);

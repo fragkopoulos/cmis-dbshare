@@ -97,6 +97,7 @@ public class DBShareTypeManager {
 
     /**
      * Adds a type definition.
+     * @param type
      */
     public synchronized void addTypeDefinition(TypeDefinition type) {
         if (type == null) {
@@ -174,6 +175,7 @@ public class DBShareTypeManager {
 
     /**
      * Returns all internal type definitions.
+     * @return 
      */
     public synchronized Collection<TypeDefinition> getInternalTypeDefinitions() {
         return typeDefinitions.values();
